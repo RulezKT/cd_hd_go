@@ -9,68 +9,7 @@ import (
 	"github.com/RulezKT/cd_consts_go"
 	"github.com/RulezKT/cd_date_go"
 	"github.com/RulezKT/cd_math_go"
-	"github.com/RulezKT/hd"
-	"github.com/RulezKT/mathfn"
-	"github.com/RulezKT/structs"
 )
-
-func CalcCosmoUTC(data cd_consts_go.GregDate, bsp cd_consts_go.BspFile, info *cd_consts_go.CdInfo) {
-
-	// console.log(data);
-	// console.log(input_year, input_month, input_day, input_hour, input_minutes, input_seconds);
-
-	// console.log(`type_of_time = ${type_of_time}`);
-	// console.log(`latitude = ${latitude}`);
-	// console.log(`longitude = ${longitude}`);
-
-	// let clean_polar = {};
-
-	var persTime cd_consts_go.TimeData
-	var sec_from_jd2000 int64
-
-	//UTC
-	persTime.UtcTime = data
-	sec_from_jd2000 = cd_date_go.GregToSecFromJD2000(persTime.UtcTime)
-
-	sec_from_jd2000 += int64(cd_date_go.DeltaT(persTime.UtcTime.Year, bsp))
-
-	persTime.SecFromJd2000 = sec_from_jd2000
-
-	// printf("NEW sec_from_jd2000 = %Lf\n", sec_from_jd2000);
-
-	// console.log(`Inputed date = ${input_hour}, ${input_minutes}, ${input_seconds},
-	//    ${input_day}, ${input_month}, ${input_year} \n`);
-
-	//console.log(`sec_from_jd2000 =  ${sec_from_jd2000}`);
-	//console.log(`use_deltaT =  ${use_deltaT}`);
-
-	//fmt.Println(sec_from_jd2000)
-	calc_personality(sec_from_jd2000, bsp)
-	calc_design(sec_from_jd2000, bsp)
-	hd.GatesChannelsCenters(info)
-	info.HdInfo.Type = hd.HdType(info)
-	hd.Profile(info)
-	hd.Authority(info)
-	hd.Variable(info)
-	hd.Cross(info)
-	info.HdInfo.Definition = hd.Definition(info)
-
-	//линия, цвет, тон, база всегда поднимаются вверх до целого числа
-	info.HdInfo.Theme, info.HdInfo.NutrType, info.HdInfo.Cognition = hd.Nutritionn(int(math.Ceil(info.HdInfo.Design.Planets.Planet[SUN].Color)), int(math.Ceil(info.HdInfo.Design.Planets.Planet[SUN].Tone)))
-	info.HdInfo.Motivation, info.HdInfo.Mind = hd.Motivation(int(math.Ceil(info.HdInfo.Personality.Planets.Planet[SUN].Color)), int(math.Ceil(info.HdInfo.Personality.Planets.Planet[SUN].Tone)))
-
-	// this.calc_fd_pers();
-	// this.calc_fd_design();
-
-	//calc_numerology()
-
-	//callback(0, this.formula)
-
-	info.HdInfo.Personality.SecFromJd2000 = persTime.SecFromJd2000
-	info.HdInfo.Personality.LocalTime = persTime.LocalTime
-	info.HdInfo.Personality.UtcTime = persTime.UtcTime
-
-}
 
 func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_consts_go.CdInfo) {
 
@@ -83,8 +22,9 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 
 	// let clean_polar = {};
 	var persTime cd_consts_go.TimeData
-	use_deltaT := true
 	var sec_from_jd2000 int64
+
+	use_deltaT := true
 
 	// Ephemeries time, вернем для правильного отображения пользователю DeltaT
 	// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
@@ -127,8 +67,14 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 
 	//fmt.Println(sec_from_jd2000)
 
-	info.Personality.Planets = calc_personality(sec_from_jd2000, bsp)
-	info.Design.Planets, info.HdInfo.Design.TimeData.UtcTime = calc_design(sec_from_jd2000, bsp, info)
+	//calc personality
+	info.Personality.Planets = *calc_hd_vars(sec_from_jd2000, bsp)
+
+	//calc design
+	sec_from_jd2000_design, design_time_UTC := calc_design_time(sec_from_jd2000, bsp)
+	info.HdInfo.Design.TimeData.UtcTime = design_time_UTC
+	info.Design.Planets = *calc_hd_vars(sec_from_jd2000_design, bsp)
+
 	GatesChannelsCenters(info)
 	info.HdInfo.Type = HdType(info)
 	Profile(info)
@@ -138,8 +84,8 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 	info.HdInfo.Definition = Definition(info)
 
 	//линия, цвет, тон, база всегда поднимаются вверх до целого числа
-	info.HdInfo.Theme, info.HdInfo.NutrType, info.HdInfo.Cognition = Nutritionn(int(math.Ceil(info.HdInfo.Design.Planets.Planet[SUN].Color)), int(math.Ceil(info.HdInfo.Design.Planets.Planet[SUN].Tone)))
-	info.HdInfo.Motivation, info.HdInfo.Mind = Motivation(int(math.Ceil(info.HdInfo.Personality.Planets.Planet[SUN].Color)), int(math.Ceil(info.HdInfo.Personality.Planets.Planet[SUN].Tone)))
+	info.HdInfo.Theme, info.HdInfo.NutrType, info.HdInfo.Cognition = Nutritionn(int(math.Ceil(info.HdInfo.Design.Planets.Planet[cd_consts_go.SUN].Color)), int(math.Ceil(info.HdInfo.Design.Planets.Planet[cd_consts_go.SUN].Tone)))
+	info.HdInfo.Motivation, info.HdInfo.Mind = Motivation(int(math.Ceil(info.HdInfo.Personality.Planets.Planet[cd_consts_go.SUN].Color)), int(math.Ceil(info.HdInfo.Personality.Planets.Planet[cd_consts_go.SUN].Tone)))
 
 	// this.calc_fd_pers();
 	// this.calc_fd_design();
@@ -151,6 +97,95 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 	info.HdInfo.Personality.SecFromJd2000 = persTime.SecFromJd2000
 	info.HdInfo.Personality.LocalTime = persTime.LocalTime
 	info.HdInfo.Personality.UtcTime = persTime.UtcTime
+
+}
+
+func calc_design_time(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, cd_consts_go.GregDate) {
+
+	// 88 градусов = 1.535889741755
+	const RAD_88_DEGREES = 1.53588974175500991848
+
+	// Солнце проходит за день 1 градус, берем для верности 1.3
+	// за 1 секунду Солнце проходит 0.000015046296296296297 градусов или 0.0000002626074106009986440 радиана
+	// (1.535889741755/7689600).toFixed(20) =  0.00000019973597349082
+	const MED_SUN_PATH_IN_1_SEC = 0.000000199
+
+	// время, которое проходит Солнце за 88 градусов
+	const SEC_FOR_88_DEGREES_SUN float64 = RAD_88_DEGREES / MED_SUN_PATH_IN_1_SEC
+
+	clean_polar := cd_bsp_go.CalcEclPosRAD(sec_from_jd2000, cd_consts_go.SUN, bsp)
+
+	design_sun_longitude := clean_polar.Longitude - RAD_88_DEGREES
+	design_sun_longitude = cd_math_go.Convert_to_0_360_RAD(design_sun_longitude)
+
+	/*
+
+	   The solution
+
+	   In my case, the solution was to track back 95 days, and get 20 recors for every day from that time. 95 because the sun is moving 1 degree about 1 day and 2-3 hours. The sun has different speed at different dates, 95days seems enought for me for 88 degree.
+
+	   With my program, I am checking, where the integer values are equals. For example, if I need to get 69.217465 degree I am just checking, where the sun was in 69.xxxxx position.
+
+	   When I have this date, I am track back 3 days, and list the values by hours, 72 hours. I get the proximate date and time. And after this, I track back 3 hours, and listing the results by seconds.
+
+
+
+	*/
+
+	//находим примерное время когда Солнце было 88 градусов назад
+	sec_from_jd2000_design := int64(float64(sec_from_jd2000) - SEC_FOR_88_DEGREES_SUN)
+
+	clean_polar = cd_bsp_go.CalcEclPosRAD(sec_from_jd2000_design, cd_consts_go.SUN, bsp)
+
+	// теперь ищем когда точно время совпадает с долготой солнца 88 градусов назад
+	var time_step int64 = 1000
+
+	if clean_polar.Longitude > design_sun_longitude {
+		for {
+			sec_from_jd2000_design -= time_step
+			// count_plus++;
+			clean_polar = cd_bsp_go.CalcEclPosRAD(sec_from_jd2000_design, cd_consts_go.SUN, bsp)
+			if math.Abs(clean_polar.Longitude-design_sun_longitude) < 0.0001 {
+				break
+			}
+			if clean_polar.Longitude < design_sun_longitude {
+				sec_from_jd2000_design += time_step
+				time_step = int64(time_step / 10)
+			}
+			if time_step == 1 {
+				break
+			}
+		}
+	} else if clean_polar.Longitude < design_sun_longitude {
+		for {
+			sec_from_jd2000_design += time_step
+			// count_minus++;
+			clean_polar = cd_bsp_go.CalcEclPosRAD(sec_from_jd2000_design, cd_consts_go.SUN, bsp)
+			if math.Abs(clean_polar.Longitude-design_sun_longitude) < 0.0001 {
+				break
+			}
+			if clean_polar.Longitude > design_sun_longitude {
+				sec_from_jd2000_design -= time_step
+				time_step = int64(time_step / 10)
+			}
+			if time_step == 1 {
+				break
+			}
+		}
+	}
+
+	//    console.log(`clean_polar.longitude = ${clean_polar.longitude},  design_sun_longitude = ${design_sun_longitude}`);
+	//    console.log(`greg_time_inputed_ET = ${time.sec_from_jd2000_to_gregdate(sec_from_jd2000)},  sec_from_jd2000 = ${sec_from_jd2000}`);
+	//    console.log(`sec_jd2000_to_greg_meeus_ET = ${time.sec_jd2000_to_greg_meeus(sec_from_jd2000_design)},  sec_from_jd2000_design = ${sec_from_jd2000_design}`);
+
+	// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
+	// UT = TDT - ΔT
+	temp_time := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design) //находим год, чтобы узнать delta_t
+	deltaT := cd_date_go.DeltaT(temp_time.Year, bsp)
+	design_time_UTC := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design - int64(deltaT))
+	// info.HdInfo.Design.TimeData.UtcTime = design_time_UTC
+
+	return sec_from_jd2000_design, design_time_UTC
 
 }
 
@@ -181,104 +216,8 @@ func calc_hd_vars(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) *cd_consts_go
 		*/
 	}
 
-	return &planets
+	return planets
 
-}
-
-func calc_personality(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) *cd_consts_go.Planets {
-	// мое время -682470731.47  [ 1978, 5, 17, 12, 47, 0 ]
-	return calc_hd_vars(sec_from_jd2000, bsp)
-
-}
-
-func calc_design(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (*cd_consts_go.Planets, cd_consts_go.GregDate) {
-	// мое время -682470731.47  [ 1978, 5, 17, 12, 47, 0 ]
-
-	// 88 градусов = 1.535889741755
-	const RAD_88_DEGREES = 1.53588974175500991848
-
-	// Солнце проходит за день 1 градус, берем для верности 1.3
-	// за 1 секунду Солнце проходит 0.000015046296296296297 градусов или 0.0000002626074106009986440 радиана
-	// (1.535889741755/7689600).toFixed(20) =  0.00000019973597349082
-	const MED_SUN_PATH_IN_1_SEC = 0.000000199
-
-	// время, которое проходит Солнце за 88 градусов
-	const SEC_FOR_88_DEGREES_SUN float64 = RAD_88_DEGREES / MED_SUN_PATH_IN_1_SEC
-
-	clean_polar := cd_bsp_go.CalcEclPosRAD(sec_from_jd2000, SUN, bsp)
-
-	design_sun_longitude := clean_polar.Longitude - RAD_88_DEGREES
-	design_sun_longitude = cd_math_go.Convert_to_0_360_RAD(design_sun_longitude)
-
-	/*
-
-	   The solution
-
-	   In my case, the solution was to track back 95 days, and get 20 recors for every day from that time. 95 because the sun is moving 1 degree about 1 day and 2-3 hours. The sun has different speed at different dates, 95days seems enought for me for 88 degree.
-
-	   With my program, I am checking, where the integer values are equals. For example, if I need to get 69.217465 degree I am just checking, where the sun was in 69.xxxxx position.
-
-	   When I have this date, I am track back 3 days, and list the values by hours, 72 hours. I get the proximate date and time. And after this, I track back 3 hours, and listing the results by seconds.
-
-
-
-	*/
-
-	//находим примерное время когда Солнце было 88 градусов назад
-	sec_from_jd2000_design := int64(float64(sec_from_jd2000) - SEC_FOR_88_DEGREES_SUN)
-
-	clean_polar = cd_bsp_go.CalcEclPosRAD(sec_from_jd2000_design, SUN, bsp)
-
-	// теперь ищем когда точно время совпадает с долготой солнца 88 градусов назад
-	var time_step int64 = 1000
-
-	if clean_polar.Longitude > design_sun_longitude {
-		for {
-			sec_from_jd2000_design -= time_step
-			// count_plus++;
-			clean_polar = cd_bsp_go.CalcEclPosRAD(sec_from_jd2000_design, SUN, bsp)
-			if math.Abs(clean_polar.Longitude-design_sun_longitude) < 0.0001 {
-				break
-			}
-			if clean_polar.Longitude < design_sun_longitude {
-				sec_from_jd2000_design += time_step
-				time_step = int64(time_step / 10)
-			}
-			if time_step == 1 {
-				break
-			}
-		}
-	} else if clean_polar.Longitude < design_sun_longitude {
-		for {
-			sec_from_jd2000_design += time_step
-			// count_minus++;
-			clean_polar = cd_bsp_go.CalcEclPosRAD(sec_from_jd2000_design, SUN, bsp)
-			if math.Abs(clean_polar.Longitude-design_sun_longitude) < 0.0001 {
-				break
-			}
-			if clean_polar.Longitude > design_sun_longitude {
-				sec_from_jd2000_design -= time_step
-				time_step = int64(time_step / 10)
-			}
-			if time_step == 1 {
-				break
-			}
-		}
-	}
-
-	//    console.log(`clean_polar.longitude = ${clean_polar.longitude},  design_sun_longitude = ${design_sun_longitude}`);
-	//    console.log(`greg_time_inputed_ET = ${time.sec_from_jd2000_to_gregdate(sec_from_jd2000)},  sec_from_jd2000 = ${sec_from_jd2000}`);
-	//    console.log(`sec_jd2000_to_greg_meeus_ET = ${time.sec_jd2000_to_greg_meeus(sec_from_jd2000_design)},  sec_from_jd2000_design = ${sec_from_jd2000_design}`);
-
-	// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
-	// UT = TDT - ΔT
-	temp_time := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design) //находим год, чтобы узнать delta_t
-	deltaT := cd_date_go.DeltaT(temp_time.Year, bsp)
-	design_time_UTC := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design - int64(deltaT))
-	// info.HdInfo.Design.TimeData.UtcTime = design_time_UTC
-
-	// время найдено, начинаем считать планеты
-	return calc_hd_vars(sec_from_jd2000_design, bsp), design_time_UTC
 }
 
 /*
@@ -401,7 +340,7 @@ func Motivation(color int, tone int) (string, string) {
 */
 
 // при показе линия, цвет, тон, база всегда поднимаются вверх до целого числа
-func CalcHexLineColorToneBase(longitude float64) structs.HdStructure {
+func CalcHexLineColorToneBase(longitude float64) cd_consts_go.HdStructure {
 
 	var hexSortByDeg = map[int]cd_consts_go.HexRangeRAD{
 
@@ -547,20 +486,20 @@ func CalcHexLineColorToneBase(longitude float64) structs.HdStructure {
 
 	var number_of_passed_degrees float64
 
-	longitude *= mathfn.RAD_TO_DEG
+	longitude *= cd_consts_go.RAD_TO_DEG
 
-	longitude = mathfn.Convert_to_0_360_DEG(longitude)
+	longitude = cd_math_go.Convert_to_0_360_DEG(longitude)
 	// console.log(`longitude = ${longitude}`);
 
 	for key, entry := range hexSortByDeg {
 
 		//25 - последняя гексаграмма и там начальное значение больше конечного, круг замыкается
-		if (longitude >= entry.startDegree) &&
-			(longitude < entry.endDegree || key == 25) {
+		if (longitude >= entry.StartDegree) &&
+			(longitude < entry.EndDegree || key == 25) {
 
 			hex = key
 			//System.out.println("hex = " + hex + "===" + longitude);
-			number_of_passed_degrees = longitude - entry.startDegree
+			number_of_passed_degrees = longitude - entry.StartDegree
 
 			line = number_of_passed_degrees / cd_consts_go.OneLineInDec
 
@@ -601,10 +540,10 @@ func CalcHexLineColorToneBase(longitude float64) structs.HdStructure {
 		fmt.Println("error in calc_hex_line_color_tone_base")
 	}
 
-	return structs.HdStructure{Hex: hex, Line: line, Color: color, Tone: tone, Base: base, NumberOfPassedDegrees: number_of_passed_degrees}
+	return cd_consts_go.HdStructure{Hex: hex, Line: line, Color: color, Tone: tone, Base: base, NumberOfPassedDegrees: number_of_passed_degrees}
 }
 
-func GatesChannelsCenters(info *structs.CdInfo) {
+func GatesChannelsCenters(info *cd_consts_go.CdInfo) {
 
 	// this.formula.personality[key].hex] и this.formula.design[key].hex показывают какие ворота определены
 	// в channels[number] = [red, black] определяем канал и как он образован red/black/both для двух ворот
@@ -613,10 +552,10 @@ func GatesChannelsCenters(info *structs.CdInfo) {
 	// инициализируем ворота, отсчет от 1
 	//	var gates [65]string
 
-	//	var channels [37]structs.Channel
+	//	var channels [37]cd_consts_go.Channel
 
 	// инициализируем центры
-	//	var centers structs.Centers
+	//	var centers cd_consts_go.Centers
 
 	//0 не берем, это SSB
 	for i := 1; i < len(info.HdInfo.Design.Planets.Planet); i++ {
@@ -1025,13 +964,13 @@ func GatesChannelsCenters(info *structs.CdInfo) {
 
 }
 
-func Profile(info *structs.CdInfo) {
+func Profile(info *cd_consts_go.CdInfo) {
 
 	info.HdInfo.Profile = strconv.Itoa(int(math.Ceil(info.HdInfo.Personality.Planets.Planet[cd_consts_go.SUN].Line))) + "/" + strconv.Itoa(int(math.Ceil(info.HdInfo.Design.Planets.Planet[cd_consts_go.SUN].Line)))
 
 }
 
-func Authority(info *structs.CdInfo) {
+func Authority(info *cd_consts_go.CdInfo) {
 
 	var authority string
 
@@ -1055,7 +994,7 @@ func Authority(info *structs.CdInfo) {
 
 }
 
-func Variable(info *structs.CdInfo) {
+func Variable(info *cd_consts_go.CdInfo) {
 
 	var first string
 	if info.HdInfo.Personality.Planets.Planet[cd_consts_go.SUN].Tone > 3 {
@@ -1093,7 +1032,7 @@ func Variable(info *structs.CdInfo) {
 
 }
 
-func Cross(info *structs.CdInfo) {
+func Cross(info *cd_consts_go.CdInfo) {
 
 	info.HdInfo.Cross.First = info.HdInfo.Personality.Planets.Planet[cd_consts_go.SUN].Hex
 	info.HdInfo.Cross.Second = info.HdInfo.Personality.Planets.Planet[cd_consts_go.EARTH].Hex
@@ -1103,7 +1042,7 @@ func Cross(info *structs.CdInfo) {
 }
 
 // TYPE
-func HdType(info *structs.CdInfo) string {
+func HdType(info *cd_consts_go.CdInfo) string {
 
 	centers := info.HdInfo.Centers.Center
 	channels := info.HdInfo.Channels
@@ -1255,7 +1194,7 @@ func HdType(info *structs.CdInfo) string {
 
 }
 
-func CentersConnections(info *structs.CdInfo) [][]string {
+func CentersConnections(info *cd_consts_go.CdInfo) [][]string {
 
 	channels := info.HdInfo.Channels
 	centers := info.HdInfo.Centers.Center
@@ -1476,7 +1415,7 @@ func CentersConnections(info *structs.CdInfo) [][]string {
 	return connArray
 }
 
-func Definition(info *structs.CdInfo) string {
+func Definition(info *cd_consts_go.CdInfo) string {
 
 	cenConn := CentersConnections(info)
 
