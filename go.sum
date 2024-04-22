@@ -6,6 +6,8 @@ github.com/RulezKT/cd_consts_go v0.0.0-20240421222047-a1a44cbe70ae h1:9LhuxKJCQz
 github.com/RulezKT/cd_consts_go v0.0.0-20240421222047-a1a44cbe70ae/go.mod h1:+GICl0NBWjz+llF5OOsBeeI/MjFt2gGogBp+fQJ5idI=
 github.com/RulezKT/cd_consts_go v0.0.0-20240421231359-56c03ff136d6 h1:q8EBTbCuqPJKCROxUejOgmoQdWbyp1yPRMxfFDSc6C8=
 github.com/RulezKT/cd_consts_go v0.0.0-20240421231359-56c03ff136d6/go.mod h1:+GICl0NBWjz+llF5OOsBeeI/MjFt2gGogBp+fQJ5idI=
+github.com/RulezKT/cd_consts_go v0.0.0-20240422171255-44047f51835b h1:kPXiLEK7b8EII6wdanasT7yS4Z+8yJ2ljxfz4w1BqUA=
+github.com/RulezKT/cd_consts_go v0.0.0-20240422171255-44047f51835b/go.mod h1:+GICl0NBWjz+llF5OOsBeeI/MjFt2gGogBp+fQJ5idI=
 github.com/RulezKT/cd_date_go v0.0.0-20240421180733-e6530383123b h1:UOvh4jvE/XTTQxlnS9p7u/iXPyMLyoxH8i1BUMsv9Y0=
 github.com/RulezKT/cd_date_go v0.0.0-20240421180733-e6530383123b/go.mod h1:KNi4dTGGrC2+Jc5lW+s6eazzezGVluzEaoOfIGaVqvk=
 github.com/RulezKT/cd_date_go v0.0.0-20240421220355-e44cefce4d2f h1:Toe7ypsrOHPRwfBMkO97GguZLGNfiumOeo849I1cQrg=
