@@ -45,6 +45,9 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 			sec_from_jd2000 += int64(cd_date_go.DeltaT(persTime.UtcTime.Year, bsp))
 		}
 		persTime.SecFromJd2000 = int64(sec_from_jd2000)
+
+		// fmt.Println("inside  data.TypeOfTyme == 1")
+		// fmt.Println("persTime.SecFromJd2000 == ", persTime.SecFromJd2000)
 	}
 
 	//local
@@ -69,6 +72,7 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 
 	//calc personality
 	info.Personality.Planets = *calc_hd_vars(sec_from_jd2000, bsp)
+	fmt.Println("pers planets , sun = ", info.Personality.Planets.Planet[cd_consts_go.SUN].Longitude)
 
 	//calc design
 	sec_from_jd2000_design, design_time_UTC := calc_design_time(sec_from_jd2000, bsp)
