@@ -13,14 +13,6 @@ import (
 
 func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_consts_go.CdInfo) {
 
-	// console.log(data);
-	// console.log(input_year, input_month, input_day, input_hour, input_minutes, input_seconds);
-
-	// console.log(`type_of_time = ${type_of_time}`);
-	// console.log(`latitude = ${latitude}`);
-	// console.log(`longitude = ${longitude}`);
-
-	// let clean_polar = {};
 	var persTime cd_consts_go.TimeData
 	var sec_from_jd2000 int64
 
@@ -66,8 +58,6 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 		persTime.SecFromJd2000 = sec_from_jd2000
 	}
 
-	// printf("NEW sec_from_jd2000 = %Lf\n", sec_from_jd2000);
-
 	//fmt.Println(sec_from_jd2000)
 
 	//calc personality
@@ -75,7 +65,7 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 	fmt.Println("pers planets , sun = ", info.Personality.Planets.Planet[cd_consts_go.SUN].Longitude)
 
 	//calc design
-	sec_from_jd2000_design, design_time_UTC := calc_design_time(sec_from_jd2000, bsp)
+	sec_from_jd2000_design, design_time_UTC := CalcDesignTime(sec_from_jd2000, bsp)
 	info.HdInfo.Design.TimeData.UtcTime = design_time_UTC
 	info.Design.Planets = *calc_hd_vars(sec_from_jd2000_design, bsp)
 
@@ -104,7 +94,7 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 
 }
 
-func calc_design_time(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, cd_consts_go.GregDate) {
+func CalcDesignTime(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, cd_consts_go.GregDate) {
 
 	// 88 градусов = 1.535889741755
 	const RAD_88_DEGREES = 1.53588974175500991848
@@ -178,18 +168,106 @@ func calc_design_time(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 		}
 	}
 
-	//    console.log(`clean_polar.longitude = ${clean_polar.longitude},  design_sun_longitude = ${design_sun_longitude}`);
-	//    console.log(`greg_time_inputed_ET = ${time.sec_from_jd2000_to_gregdate(sec_from_jd2000)},  sec_from_jd2000 = ${sec_from_jd2000}`);
-	//    console.log(`sec_jd2000_to_greg_meeus_ET = ${time.sec_jd2000_to_greg_meeus(sec_from_jd2000_design)},  sec_from_jd2000_design = ${sec_from_jd2000_design}`);
-
 	// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
 	// UT = TDT - ΔT
 	temp_time := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design) //находим год, чтобы узнать delta_t
 	deltaT := cd_date_go.DeltaT(temp_time.Year, bsp)
 	design_time_UTC := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design - int64(deltaT))
-	// info.HdInfo.Design.TimeData.UtcTime = design_time_UTC
 
 	return sec_from_jd2000_design, design_time_UTC
+
+}
+
+// prec controls the number of digits (excluding the exponent)
+//
+//	prec of -1 uses the smallest number of digits
+func TruncFloat(f float64, prec int) float64 {
+	floatBits := 64
+
+	if math.IsNaN(f) || math.IsInf(f, 1) || math.IsInf(f, -1) {
+		fmt.Println("error in TruncFloat")
+		return 0
+	}
+
+	fTruncStr := strconv.FormatFloat(f, 'f', prec+1, floatBits)
+	fTruncStr = fTruncStr[:len(fTruncStr)-1]
+	fTrunc, err := strconv.ParseFloat(fTruncStr, floatBits)
+	if err != nil {
+		fmt.Println("error in TruncFloat")
+		return 0
+
+	}
+
+	return fTrunc
+}
+
+// 2024
+func CalcDesignTimeV2(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, cd_consts_go.GregDate) {
+
+	// const MAX_DEVIATION_SEC = 263001.6
+	const DIFF_88_DAYS = 7_714_285.72
+	const RAD_FOR_1_SECOND_WITH_DEV = 0.000000199 + 0.00000000598
+	const ROUND_VALUE = 6
+
+	//находим примерное время когда Солнце было 88 градусов назад
+
+	// sec_from_jd2000_design := int64(float64(sec_from_jd2000) - cd_consts_go.SEC_FOR_88_DEGREES_SUN)
+	sec_from_jd2000_design := int64(float64(sec_from_jd2000) - DIFF_88_DAYS)
+
+	clean_polar := cd_bsp_go.CalcEclPosRAD(sec_from_jd2000, cd_consts_go.SUN, bsp)
+
+	design_sun_longitude := clean_polar.Longitude - cd_consts_go.RAD_88_DEGREES
+	design_sun_longitude = cd_math_go.Convert_to_0_360_RAD(design_sun_longitude)
+	design_sun_longitude_rounded := TruncFloat(design_sun_longitude, ROUND_VALUE)
+
+	clean_polar_longitude_rounded := TruncFloat(clean_polar.Longitude, ROUND_VALUE)
+
+	for {
+
+		var coeff int64
+		var step float64
+
+		if sec_from_jd2000_design < int64(float64(sec_from_jd2000)-DIFF_88_DAYS-86400) {
+			fmt.Println("error in CalcDesignTimeV2")
+
+		}
+
+		if clean_polar_longitude_rounded == design_sun_longitude_rounded {
+			// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
+			// UT = TDT - ΔT
+			temp_time := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design) //находим год, чтобы узнать delta_t
+			deltaT := cd_date_go.DeltaT(temp_time.Year, bsp)
+			design_time_UTC := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design - int64(deltaT))
+
+			// fmt.Println("inside CalcDesignTimeV2")
+			// fmt.Println("design_sun_longitude_rounded == ", design_sun_longitude_rounded)
+			// fmt.Println("clean_polar_longitude_rounded == ", clean_polar_longitude_rounded)
+
+			return sec_from_jd2000_design, design_time_UTC
+		}
+
+		diff_rad := clean_polar_longitude_rounded - design_sun_longitude_rounded
+
+		if diff_rad < 0 {
+			coeff = 1
+		} else if diff_rad > 0 {
+			coeff = -1
+		}
+		diff_rad = math.Abs(diff_rad)
+
+		if diff_rad < RAD_FOR_1_SECOND_WITH_DEV {
+			step = 1 * float64(coeff)
+
+		} else {
+			step = (diff_rad / RAD_FOR_1_SECOND_WITH_DEV) * float64(coeff)
+
+		}
+
+		sec_from_jd2000_design += int64(step)
+		clean_polar = cd_bsp_go.CalcEclPosRAD(sec_from_jd2000_design, cd_consts_go.SUN, bsp)
+		clean_polar_longitude_rounded = TruncFloat(clean_polar.Longitude, ROUND_VALUE)
+
+	}
 
 }
 
