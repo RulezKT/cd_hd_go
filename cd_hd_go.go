@@ -23,7 +23,7 @@ func ConvertTime(data cd_consts_go.TimeData) (int64, cd_consts_go.TimeData) {
 	if data.TypeOfTyme == 0 {
 		sec_from_jd2000 = data.SecFromJd2000
 		persTime.SecFromJd2000 = sec_from_jd2000
-		persTime.UtcTime = cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000 - int64(cd_date_go.DeltaT(cd_date_go.SecFromJd2000ToGreg(sec_from_jd2000).Year, bsp)))
+		persTime.UtcTime = cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000 - int64(cd_date_go.DeltaT(cd_date_go.SecFromJd2000ToGreg(sec_from_jd2000).Year)))
 	}
 
 	//UTC
@@ -237,7 +237,7 @@ func CalcDesignTime_old(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64,
 	// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
 	// UT = TDT - ΔT
 	temp_time := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design) //находим год, чтобы узнать delta_t
-	deltaT := cd_date_go.DeltaT(temp_time.Year, bsp)
+	deltaT := cd_date_go.DeltaT(temp_time.Year)
 	design_time_UTC := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design - int64(deltaT))
 
 	return sec_from_jd2000_design, design_time_UTC
@@ -304,7 +304,7 @@ func CalcDesignTimeV2_old(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int6
 			// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
 			// UT = TDT - ΔT
 			temp_time := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design) //находим год, чтобы узнать delta_t
-			deltaT := cd_date_go.DeltaT(temp_time.Year, bsp)
+			deltaT := cd_date_go.DeltaT(temp_time.Year)
 			design_time_UTC := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design - int64(deltaT))
 
 			// fmt.Println("inside CalcDesignTimeV2")
@@ -434,7 +434,7 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 			// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
 			// UT = TDT - ΔT
 			temp_time := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design) //находим год, чтобы узнать delta_t
-			deltaT := cd_date_go.DeltaT(temp_time.Year, bsp)
+			deltaT := cd_date_go.DeltaT(temp_time.Year)
 			design_time_UTC := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design - int64(deltaT))
 
 			// fmt.Println("inside CalcDesignTimeV2")

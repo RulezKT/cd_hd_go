@@ -14,10 +14,14 @@ github.com/RulezKT/cd_date_go v0.0.0-20240421180733-e6530383123b h1:UOvh4jvE/XTT
 github.com/RulezKT/cd_date_go v0.0.0-20240421180733-e6530383123b/go.mod h1:KNi4dTGGrC2+Jc5lW+s6eazzezGVluzEaoOfIGaVqvk=
 github.com/RulezKT/cd_date_go v0.0.0-20240421220355-e44cefce4d2f h1:Toe7ypsrOHPRwfBMkO97GguZLGNfiumOeo849I1cQrg=
 github.com/RulezKT/cd_date_go v0.0.0-20240421220355-e44cefce4d2f/go.mod h1:HIi8hrqXHxpRxGTbSOEZj55S/1O9Y0+m61hhehoMB4s=
+github.com/RulezKT/cd_date_go v0.0.0-20240423174658-af495f2d2e66 h1:MxnYdkAcvV/nZHDAFUgprXEfuZjkxyxlvOBoj+0ku9I=
+github.com/RulezKT/cd_date_go v0.0.0-20240423174658-af495f2d2e66/go.mod h1:HIi8hrqXHxpRxGTbSOEZj55S/1O9Y0+m61hhehoMB4s=
 github.com/RulezKT/cd_de_440s_go v0.0.0-20240421194153-8f49dfd717bd h1:G8eXyGS4xy3B7pjvIz53sdX0KFhI9uLCpH6a0cDn1CY=
 github.com/RulezKT/cd_de_440s_go v0.0.0-20240421194153-8f49dfd717bd/go.mod h1:97r63aLAxbi32zoY2nepZJhelBSUPZt2pvyW0XGeffg=
 github.com/RulezKT/cd_math_go v0.0.0-20240421202144-92899f1b6c9b h1:02P5HVZ7NSysFrIzsbvlV2RPV6hCa6qdUtXFZ9HWC/k=
 github.com/RulezKT/cd_math_go v0.0.0-20240421202144-92899f1b6c9b/go.mod h1:Pup152rBZIfzoLY29o0kkME0gAPdadX+NLiTabu1VIY=
+github.com/RulezKT/cd_math_go v0.0.0-20240423163945-7c2609d21fa6 h1:XglEwNhwyf50nD6vrjfjX+hUK34JqokrmWYx7eM+Lks=
+github.com/RulezKT/cd_math_go v0.0.0-20240423163945-7c2609d21fa6/go.mod h1:Pup152rBZIfzoLY29o0kkME0gAPdadX+NLiTabu1VIY=
 github.com/RulezKT/cd_nodes_go v0.0.0-20240421193639-361def1ecd0f h1:1r+Qb7y4kUehU0/soEMhJTtmTyscuc4lyiuvkubzqIU=
 github.com/RulezKT/cd_nodes_go v0.0.0-20240421193639-361def1ecd0f/go.mod h1:nXgckqNi+j63yyhse3yQuUQkO6P+rK22AbZmDabX5RI=
 github.com/RulezKT/gregdate v0.0.0-20210418212125-bb72d33a83a8/go.mod h1:TpjO3ZW5jJtZnlBVQLyMiCV7VRy7uWAAJEcPAYY58XM=
