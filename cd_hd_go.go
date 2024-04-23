@@ -95,6 +95,20 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 }
 
 func CalcDesignTime(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, cd_consts_go.GregDate) {
+	// GoLang de440s
+	//Max diff:  7_951_038
+	//Min diff:  7_482_038
+	//Med diff:  7_716_538
+
+	// JS de440s
+	//Max diff:  7_950_930
+	//Min diff:  7_481_835
+	//Med diff:  7716382
+
+	// So for calccs we take:
+	//Max diff:  7_951_038
+	//Min diff:  7_481_835
+	//Med diff:  7_716_436
 
 	// 88 градусов = 1.535889741755
 	const RAD_88_DEGREES = 1.53588974175500991848
@@ -205,7 +219,9 @@ func TruncFloat(f float64, prec int) float64 {
 func CalcDesignTimeV2(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, cd_consts_go.GregDate) {
 
 	// const MAX_DEVIATION_SEC = 263001.6
-	const DIFF_88_DAYS = 7_714_285.72
+	const DIFF_88_DAYS = 7603200.00
+	const MAX_DIFFERENCE = DIFF_88_DAYS + int64(2*cd_consts_go.SEC_IN_1_DAY)
+	const MIN_DIFFERENCE = DIFF_88_DAYS - int64(2*cd_consts_go.SEC_IN_1_DAY)
 	const RAD_FOR_1_SECOND_WITH_DEV = 0.000000199 + 0.00000000598
 	const ROUND_VALUE = 6
 
@@ -220,17 +236,13 @@ func CalcDesignTimeV2(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 	design_sun_longitude = cd_math_go.Convert_to_0_360_RAD(design_sun_longitude)
 	design_sun_longitude_rounded := TruncFloat(design_sun_longitude, ROUND_VALUE)
 
+	clean_polar = cd_bsp_go.CalcEclPosRAD(sec_from_jd2000_design, cd_consts_go.SUN, bsp)
 	clean_polar_longitude_rounded := TruncFloat(clean_polar.Longitude, ROUND_VALUE)
 
 	for {
 
 		var coeff int64
 		var step float64
-
-		if sec_from_jd2000_design < int64(float64(sec_from_jd2000)-DIFF_88_DAYS-86400) {
-			fmt.Println("error in CalcDesignTimeV2")
-
-		}
 
 		if clean_polar_longitude_rounded == design_sun_longitude_rounded {
 			// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
@@ -246,6 +258,34 @@ func CalcDesignTimeV2(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 			return sec_from_jd2000_design, design_time_UTC
 		}
 
+		if sec_from_jd2000-sec_from_jd2000_design > MAX_DIFFERENCE {
+
+			sec_from_jd2000_design = int64(float64(sec_from_jd2000) - DIFF_88_DAYS)
+			// fmt.Println("error in CalcDesignTimeV2")
+
+		}
+		if sec_from_jd2000-sec_from_jd2000_design < MIN_DIFFERENCE {
+			sec_from_jd2000_design = int64(float64(sec_from_jd2000) - DIFF_88_DAYS)
+			// fmt.Println("error in CalcDesignTimeV2")
+		}
+
+		if 0 < clean_polar_longitude_rounded && clean_polar_longitude_rounded < math.Pi/2 {
+			if design_sun_longitude_rounded > clean_polar_longitude_rounded+math.Pi/2 {
+				// fmt.Println("sec_from_jd2000 == ", sec_from_jd2000)
+				// fmt.Println("design_sun_longitude_rounded == ", design_sun_longitude_rounded)
+				// fmt.Println("clean_polar_longitude_rounded == ", clean_polar_longitude_rounded)
+
+				clean_polar_longitude_rounded += 2 * math.Pi
+			}
+
+		}
+
+		// if design_sun_longitude_rounded > clean_polar_longitude_rounded+math.Pi/2 {
+		// 	//clean_polar_longitude_rounded is from 0 to Pi/2
+		// 	fmt.Println("sec_from_jd2000 == ", sec_from_jd2000)
+		// 	// panic("error in CalcDesignTimeV2")
+		// }
+
 		diff_rad := clean_polar_longitude_rounded - design_sun_longitude_rounded
 
 		if diff_rad < 0 {
@@ -253,6 +293,7 @@ func CalcDesignTimeV2(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 		} else if diff_rad > 0 {
 			coeff = -1
 		}
+
 		diff_rad = math.Abs(diff_rad)
 
 		if diff_rad < RAD_FOR_1_SECOND_WITH_DEV {
@@ -260,6 +301,8 @@ func CalcDesignTimeV2(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 
 		} else {
 			step = (diff_rad / RAD_FOR_1_SECOND_WITH_DEV) * float64(coeff)
+			// fmt.Println("step == ", step)
+			// step = 1 * float64(coeff)
 
 		}
 
