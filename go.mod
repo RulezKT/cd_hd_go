@@ -4,8 +4,8 @@ go 1.22.2
 
 require (
 	github.com/RulezKT/cd_bsp_go v0.0.0-00010101000000-000000000000
-	github.com/RulezKT/cd_consts_go v0.0.0-20240423175144-3d105b95de29
-	github.com/RulezKT/cd_date_go v0.0.0-20240423174658-af495f2d2e66
+	github.com/RulezKT/cd_consts_go v0.0.0-20240423205928-141dfedc4383
+	github.com/RulezKT/cd_date_go v0.0.0-20240423210810-44ffbd6179b3
 	github.com/RulezKT/cd_de_440s_go v0.0.0-20240423181702-c707a07e5f66
 	github.com/RulezKT/cd_math_go v0.0.0-20240423163945-7c2609d21fa6
 )

@@ -9,14 +9,17 @@ import (
 	"github.com/RulezKT/cd_hd_go"
 )
 
-func test_calc_design_time(bsp cd_consts_go.BspFile) {
+func test_calc_design_time(bsp cd_consts_go.BspFile, start_time int64, end_time int64, time_step int64) {
 	var max_diff int64 = 0
 	var min_diff int64 = math.MaxInt64
 	var max_i int64
 	var min_i int64
 	var v1 int64
 	fmt.Println("Start testing...")
-	for i := int64(-4734072000.0 + 8_000_000); i < 4735368000-8_000_000; i += 10_000_000 {
+	fmt.Println("Start time: ", start_time)
+	fmt.Println("End time: ", end_time)
+	fmt.Println("Time step: ", time_step)
+	for i := start_time; i < end_time; i += time_step {
 
 		v1, _ = cd_hd_go.CalcDesignTimeV3(i, bsp)
 		// v2, _ = cd_hd_go.CalcDesignTimeV2(i, bsp)
@@ -59,31 +62,44 @@ func main() {
 	bsp := cd_de_440s_go.Load440s()
 	// test_calc_design_time(bsp)
 
-	var info cd_consts_go.CdInfo
-	info.HdInfo.Init()
+	var start_time int64 = -4734072000 + 8_000_000
+	var end_time int64 = 4735368000 - 8_000_000
 
-	utc_time := cd_consts_go.GregDate{
-		Year:    1978,
-		Month:   05,
-		Day:     17,
-		Hour:    12,
-		Minutes: 45,
-		Seconds: 01,
-	}
-	var date_to_calc = cd_consts_go.TimeData{
-		LocalTime: cd_consts_go.GregDate{}, // LocalTime GregDate //для design всегда 0
-		UtcTime:   utc_time,                // UtcTime   cd_consts_go.GregDate
+	// test_calc_design_time(bsp, start_time, start_time+1_000_000_000, 1)
+	// test_calc_design_time(bsp, start_time+1_000_000_000, start_time+2_000_000_000, 1)
+	// test_calc_design_time(bsp, start_time+2_000_000_000, start_time+3_000_000_000, 1)
+	// test_calc_design_time(bsp, start_time+3_000_000_000, start_time+4_000_000_000, 1)
+	// test_calc_design_time(bsp, start_time+4_000_000_000, start_time+5_000_000_000, 1)
+	// test_calc_design_time(bsp, start_time+5_000_000_000, start_time+6_000_000_000, 1)
+	// test_calc_design_time(bsp, start_time+6_000_000_000, start_time+7_000_000_000, 1)
+	// test_calc_design_time(bsp, start_time+7_000_000_000, start_time+8_000_000_000, 1)
+	test_calc_design_time(bsp, start_time+8_000_000_000, end_time, 10_000_000)
 
-		TypeOfTyme:    1,  // TypeOfTyme    int    //Изначальный источник данных 2 - local time, 1- UTC Time,  0 - Ephemeries time
-		Offset:        0,  // Offset        int    //смещение локального времени от UTC в секундах
-		SecFromJd2000: 0,  // SecFromJd2000 int64  // Ephemeries time
-		Place:         "", // Place         string // не пустой, только если время изначально Local, для design всегда пустой
-	}
+	// var info cd_consts_go.CdInfo
+	// info.HdInfo.Init()
 
-	//-682470731
-	cd_hd_go.CalcCosmo(date_to_calc, bsp, &info)
+	// utc_time := cd_consts_go.GregDate{
+	// 	Year:    1978,
+	// 	Month:   05,
+	// 	Day:     17,
+	// 	Hour:    12,
+	// 	Minutes: 45,
+	// 	Seconds: 01,
+	// }
+	// var date_to_calc = cd_consts_go.TimeData{
+	// 	LocalTime: cd_consts_go.GregDate{}, // LocalTime GregDate //для design всегда 0
+	// 	UtcTime:   utc_time,                // UtcTime   cd_consts_go.GregDate
 
-	fmt.Println(info)
+	// 	TypeOfTyme:    1,  // TypeOfTyme    int    //Изначальный источник данных 2 - local time, 1- UTC Time,  0 - Ephemeries time
+	// 	Offset:        0,  // Offset        int    //смещение локального времени от UTC в секундах
+	// 	SecFromJd2000: 0,  // SecFromJd2000 int64  // Ephemeries time
+	// 	Place:         "", // Place         string // не пустой, только если время изначально Local, для design всегда пустой
+	// }
+
+	// //-682470731
+	// cd_hd_go.CalcCosmo(date_to_calc, bsp, &info)
+
+	// fmt.Println(info)
 
 	// my seconds -682470731
 

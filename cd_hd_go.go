@@ -430,7 +430,7 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 			fmt.Println("error in CalcDesignTimeV3,  de440s range exceeded")
 		}
 
-		if clean_polar_longitude_rounded == design_sun_longitude_rounded {
+		if clean_polar_longitude_rounded == design_sun_longitude_rounded || number_of_cycles_to_calc > 10 {
 			// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
 			// UT = TDT - ΔT
 			temp_time := cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000_design) //находим год, чтобы узнать delta_t
@@ -440,7 +440,7 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 			// fmt.Println("inside CalcDesignTimeV2")
 			// fmt.Println("design_sun_longitude_rounded == ", design_sun_longitude_rounded)
 			// fmt.Println("clean_polar_longitude_rounded == ", clean_polar_longitude_rounded)
-			if number_of_cycles_to_calc > 9 {
+			if number_of_cycles_to_calc > 10 {
 				fmt.Println("number_of_cycles_to_calc == ", number_of_cycles_to_calc)
 			}
 
