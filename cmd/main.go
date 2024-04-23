@@ -68,7 +68,7 @@ func main() {
 	var max_i int64
 	var min_i int64
 	fmt.Println("Start testing...")
-	for i := int64(-4734072000.0 + 80_000_000); i < 4735368000-80_000_000; i += 1_000 {
+	for i := int64(-4734072000.0 + 8_000_000); i < 4735368000-8_000_000; i += 10_000_000 {
 
 		v1, _ = cd_hd_go.CalcDesignTimeV3(i, bsp)
 		// v2, _ = cd_hd_go.CalcDesignTimeV2(i, bsp)

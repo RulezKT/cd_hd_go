@@ -324,8 +324,17 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 	//Min diff:  7_481_835
 	//Med diff:  7_716_436
 
+	// 10_000 sec
+	// Max diff:  7950939
+	// Min diff:  7481835
+
+	// 1000 sec
 	// 	Max diff:  7950934
 	// Min diff:  7481835
+
+	//100 sec
+
+	//1 sec
 
 	const MED_DIFFERENCE = 7_716_436
 	const MAX_DIFFERENCE = 7_951_038
@@ -352,7 +361,10 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 
 	// revert_coeff := clean_polar_original_rounded < design_sun_longitude_rounded
 
+	var prev_step float64 = math.MaxFloat64
+	var number_of_cycles_to_calc int64 = 0
 	for {
+		number_of_cycles_to_calc += 1
 
 		var coeff int64
 		var step float64
@@ -376,6 +388,9 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 			// fmt.Println("inside CalcDesignTimeV2")
 			// fmt.Println("design_sun_longitude_rounded == ", design_sun_longitude_rounded)
 			// fmt.Println("clean_polar_longitude_rounded == ", clean_polar_longitude_rounded)
+			if number_of_cycles_to_calc > 6 {
+				fmt.Println("number_of_cycles_to_calc == ", number_of_cycles_to_calc)
+			}
 
 			return sec_from_jd2000_design, design_time_UTC
 		}
@@ -407,24 +422,24 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 		} else {
 			step = (diff_rad / RAD_FOR_1_SECOND_WITH_DEV) * float64(coeff)
 
-			test_des_time := sec_from_jd2000_design + int64(step)
-
-			if test_des_time < seconds_lowest_value {
-				sec_from_jd2000_design = seconds_lowest_value
-				step = 0
-
-			}
-
-			if test_des_time > seconds_highest_value {
-				sec_from_jd2000_design = seconds_highest_value
-				step = 0
-
-			}
-
 		}
+
+		if math.Abs(step) > prev_step {
+			fmt.Println("error in CalcDesignTimeV3, step > prev_step")
+		}
+		prev_step = math.Abs(step)
 
 		// fmt.Println("step == ", step)
 		sec_from_jd2000_design += int64(step)
+		if sec_from_jd2000_design < seconds_lowest_value {
+			sec_from_jd2000_design = seconds_lowest_value
+
+		}
+
+		if sec_from_jd2000_design > seconds_highest_value {
+			sec_from_jd2000_design = seconds_highest_value
+
+		}
 
 		clean_polar = cd_bsp_go.CalcEclPosRAD(sec_from_jd2000_design, cd_consts_go.SUN, bsp)
 		clean_polar_longitude_rounded = TruncFloat(clean_polar.Longitude, ROUND_VALUE)
