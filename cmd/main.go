@@ -83,20 +83,20 @@ func main() {
 	//-682470731
 	cd_hd_go.CalcCosmo(date_to_calc, bsp, &info)
 
-	fmt.Println(date_to_calc)
+	fmt.Println(info)
 
 	// my seconds -682470731
 
-	v2, _ := cd_hd_go.CalcDesignTimeV3(
-		-4719200000, bsp)
+	// v2, _ := cd_hd_go.CalcDesignTimeV3(
+	// 	-4719200000, bsp)
 
-	fmt.Println(v2)
+	// fmt.Println(v2)
 
-	v2, _ = cd_hd_go.CalcDesignTimeV3(-4_719_196_000, bsp)
-	fmt.Println(v2)
+	// v2, _ = cd_hd_go.CalcDesignTimeV3(-4_719_196_000, bsp)
+	// fmt.Println(v2)
 
-	v2, _ = cd_hd_go.CalcDesignTimeV3(1_682_470_731, bsp)
-	fmt.Println(v2)
+	// v2, _ = cd_hd_go.CalcDesignTimeV3(1_682_470_731, bsp)
+	// fmt.Println(v2)
 
 }
 
