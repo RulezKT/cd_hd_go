@@ -65,7 +65,7 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 	fmt.Println("pers planets , sun = ", info.Personality.Planets.Planet[cd_consts_go.SUN].Longitude)
 
 	//calc design
-	sec_from_jd2000_design, design_time_UTC := CalcDesignTime(sec_from_jd2000, bsp)
+	sec_from_jd2000_design, design_time_UTC := CalcDesignTimeV3(sec_from_jd2000, bsp)
 	info.HdInfo.Design.TimeData.UtcTime = design_time_UTC
 	info.Design.Planets = *calc_hd_vars(sec_from_jd2000_design, bsp)
 
@@ -94,7 +94,7 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 
 }
 
-func CalcDesignTime(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, cd_consts_go.GregDate) {
+func CalcDesignTime_old(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, cd_consts_go.GregDate) {
 	// GoLang de440s
 	//Max diff:  7_951_038
 	//Min diff:  7_482_038
@@ -216,7 +216,7 @@ func TruncFloat(f float64, prec int) float64 {
 }
 
 // 2024
-func CalcDesignTimeV2(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, cd_consts_go.GregDate) {
+func CalcDesignTimeV2_old(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, cd_consts_go.GregDate) {
 	// So for calcs we take:
 	//Max diff:  7_951_038
 	//Min diff:  7_481_835
@@ -324,9 +324,15 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 	//Min diff:  7_481_835
 	//Med diff:  7_716_436
 
+	// 	Max diff:  7950934
+	// Min diff:  7481835
+
 	const MED_DIFFERENCE = 7_716_436
 	const MAX_DIFFERENCE = 7_951_038
 	const MIN_DIFFERENCE = 7_481_835
+
+	seconds_lowest_value := sec_from_jd2000 - MAX_DIFFERENCE
+	seconds_highest_value := sec_from_jd2000 - MIN_DIFFERENCE
 
 	const RAD_FOR_1_SECOND_WITH_DEV = 0.000000199 + 0.00000000598
 	const ROUND_VALUE = 6
@@ -335,21 +341,30 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 	sec_from_jd2000_design := int64(float64(sec_from_jd2000) - MED_DIFFERENCE)
 
 	clean_polar_original := cd_bsp_go.CalcEclPosRAD(sec_from_jd2000, cd_consts_go.SUN, bsp)
+	// clean_polar_original_rounded := TruncFloat(clean_polar_original.Longitude, ROUND_VALUE)
+
 	design_sun_longitude := clean_polar_original.Longitude - cd_consts_go.RAD_88_DEGREES
 	design_sun_longitude = cd_math_go.Convert_to_0_360_RAD(design_sun_longitude)
 	design_sun_longitude_rounded := TruncFloat(design_sun_longitude, ROUND_VALUE)
 
 	clean_polar := cd_bsp_go.CalcEclPosRAD(sec_from_jd2000_design, cd_consts_go.SUN, bsp)
-	cleasn_polar_first := clean_polar
 	clean_polar_longitude_rounded := TruncFloat(clean_polar.Longitude, ROUND_VALUE)
+
+	// revert_coeff := clean_polar_original_rounded < design_sun_longitude_rounded
 
 	for {
 
 		var coeff int64
 		var step float64
+		var diff_rad float64
 
-		// if clean_polar_longitude_rounded < design_sun_longitude_rounded coeff = 1
-		// if clean_polar_longitude_rounded > design_sun_longitude_rounded coeff = -1
+		if sec_from_jd2000_design < seconds_lowest_value || sec_from_jd2000_design > seconds_highest_value {
+			fmt.Println("error in CalcDesignTimeV3,  max_diff range exceeded")
+		}
+
+		if sec_from_jd2000_design < -4734072000.0 || sec_from_jd2000_design > 4735368000 {
+			fmt.Println("error in CalcDesignTimeV3,  de440s range exceeded")
+		}
 
 		if clean_polar_longitude_rounded == design_sun_longitude_rounded {
 			// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
@@ -365,35 +380,7 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 			return sec_from_jd2000_design, design_time_UTC
 		}
 
-		if sec_from_jd2000-sec_from_jd2000_design > MAX_DIFFERENCE {
-
-			sec_from_jd2000_design = int64(float64(sec_from_jd2000) - DIFF_88_DAYS)
-			// fmt.Println("error in CalcDesignTimeV2")
-
-		}
-		if sec_from_jd2000-sec_from_jd2000_design < MIN_DIFFERENCE {
-			sec_from_jd2000_design = int64(float64(sec_from_jd2000) - DIFF_88_DAYS)
-			// fmt.Println("error in CalcDesignTimeV2")
-		}
-
-		if 0 < clean_polar_longitude_rounded && clean_polar_longitude_rounded < math.Pi/2 {
-			if design_sun_longitude_rounded > clean_polar_longitude_rounded+math.Pi/2 {
-				// fmt.Println("sec_from_jd2000 == ", sec_from_jd2000)
-				// fmt.Println("design_sun_longitude_rounded == ", design_sun_longitude_rounded)
-				// fmt.Println("clean_polar_longitude_rounded == ", clean_polar_longitude_rounded)
-
-				clean_polar_longitude_rounded += 2 * math.Pi
-			}
-
-		}
-
-		// if design_sun_longitude_rounded > clean_polar_longitude_rounded+math.Pi/2 {
-		// 	//clean_polar_longitude_rounded is from 0 to Pi/2
-		// 	fmt.Println("sec_from_jd2000 == ", sec_from_jd2000)
-		// 	// panic("error in CalcDesignTimeV2")
-		// }
-
-		diff_rad := clean_polar_longitude_rounded - design_sun_longitude_rounded
+		diff_rad = clean_polar_longitude_rounded - design_sun_longitude_rounded
 
 		if diff_rad < 0 {
 			coeff = 1
@@ -403,17 +390,42 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 
 		diff_rad = math.Abs(diff_rad)
 
+		// 4 grad == rad 0.06981317007977318
+		if diff_rad > math.Pi/2+0.08 {
+			if clean_polar_longitude_rounded < design_sun_longitude_rounded {
+				coeff = -1
+				diff_rad = math.Abs(clean_polar_longitude_rounded + (2*math.Pi - design_sun_longitude_rounded))
+			} else {
+				coeff = 1
+				diff_rad = math.Abs(design_sun_longitude_rounded + (2*math.Pi - clean_polar_longitude_rounded))
+			}
+		}
+
 		if diff_rad < RAD_FOR_1_SECOND_WITH_DEV {
 			step = 1 * float64(coeff)
 
 		} else {
 			step = (diff_rad / RAD_FOR_1_SECOND_WITH_DEV) * float64(coeff)
-			// fmt.Println("step == ", step)
-			// step = 1 * float64(coeff)
+
+			test_des_time := sec_from_jd2000_design + int64(step)
+
+			if test_des_time < seconds_lowest_value {
+				sec_from_jd2000_design = seconds_lowest_value
+				step = 0
+
+			}
+
+			if test_des_time > seconds_highest_value {
+				sec_from_jd2000_design = seconds_highest_value
+				step = 0
+
+			}
 
 		}
 
+		// fmt.Println("step == ", step)
 		sec_from_jd2000_design += int64(step)
+
 		clean_polar = cd_bsp_go.CalcEclPosRAD(sec_from_jd2000_design, cd_consts_go.SUN, bsp)
 		clean_polar_longitude_rounded = TruncFloat(clean_polar.Longitude, ROUND_VALUE)
 

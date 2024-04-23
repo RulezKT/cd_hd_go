@@ -40,22 +40,22 @@ func main() {
 	// fmt.Println(date_to_calc)
 
 	// my seconds -682470731
-	// v1, _ := cd_hd_go.CalcDesignTime(
+	// v1, _ = cd_hd_go.CalcDesignTime(
 	// 	-4719200000, bsp)
-	// v2, _ := cd_hd_go.CalcDesignTimeV2(
+	// v2, _ := cd_hd_go.CalcDesignTimeV3(
 	// 	-4719200000, bsp)
 	// fmt.Println(v1)
 	// fmt.Println(v2)
 	// fmt.Println(v2 - v1)
 
-	// v1, _ = cd_hd_go.CalcDesignTime(-4719196000, bsp)
-	// v2, _ = cd_hd_go.CalcDesignTimeV2(-4719196000, bsp)
+	// v1, _ = cd_hd_go.CalcDesignTime(-4_719_196_000, bsp)
+	// v2, _ = cd_hd_go.CalcDesignTimeV3(-4_719_196_000, bsp)
 	// fmt.Println(v1)
 	// fmt.Println(v2)
 	// fmt.Println(v2 - v1)
 
 	// v1, _ = cd_hd_go.CalcDesignTime(1_682_470_731, bsp)
-	// v2, _ = cd_hd_go.CalcDesignTimeV2(1_682_470_731, bsp)
+	// v2, _ = cd_hd_go.CalcDesignTimeV3(1_682_470_731, bsp)
 	// fmt.Println(v1)
 	// fmt.Println(v2)
 	// fmt.Println(v2 - v1)
@@ -68,9 +68,9 @@ func main() {
 	var max_i int64
 	var min_i int64
 	fmt.Println("Start testing...")
-	for i := int64(-4734072000.0 + 80_000_000); i < 4735368000-80_000_000; i += 100_000 {
+	for i := int64(-4734072000.0 + 80_000_000); i < 4735368000-80_000_000; i += 1_000 {
 
-		v1, _ = cd_hd_go.CalcDesignTime(i, bsp)
+		v1, _ = cd_hd_go.CalcDesignTimeV3(i, bsp)
 		// v2, _ = cd_hd_go.CalcDesignTimeV2(i, bsp)
 		// diff := math.Abs(float64(v2 - v1))
 		// if diff > 1000 {
@@ -79,8 +79,11 @@ func main() {
 
 		diff := int64(math.Abs(float64(i - v1)))
 
-		if diff > 9_000_000 {
-			continue
+		if diff > 8_000_000 {
+
+			fmt.Println("difference: ", diff)
+			fmt.Println("i: ", i)
+			panic(fmt.Sprintf("V1: %v  difference: %v ", v1, diff))
 		}
 
 		if diff > max_diff {
@@ -96,8 +99,9 @@ func main() {
 	}
 
 	fmt.Println("Max diff: ", max_diff)
-	fmt.Println("Max diff i: ", max_i)
 	fmt.Println("Min diff: ", min_diff)
+
+	fmt.Println("Max diff i: ", max_i)
 	fmt.Println("Min diff i: ", min_i)
 
 }
