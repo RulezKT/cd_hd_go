@@ -388,7 +388,7 @@ func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, c
 			// fmt.Println("inside CalcDesignTimeV2")
 			// fmt.Println("design_sun_longitude_rounded == ", design_sun_longitude_rounded)
 			// fmt.Println("clean_polar_longitude_rounded == ", clean_polar_longitude_rounded)
-			if number_of_cycles_to_calc > 6 {
+			if number_of_cycles_to_calc > 9 {
 				fmt.Println("number_of_cycles_to_calc == ", number_of_cycles_to_calc)
 			}
 
