@@ -11,11 +11,10 @@ import (
 	"github.com/RulezKT/cd_math_go"
 )
 
-func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_consts_go.CdInfo) {
+func ConvertTime(data cd_consts_go.TimeData) (int64, cd_consts_go.TimeData) {
 
 	var persTime cd_consts_go.TimeData
 	var sec_from_jd2000 int64
-
 	use_deltaT := true
 
 	// Ephemeries time, вернем для правильного отображения пользователю DeltaT
@@ -34,7 +33,7 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 		// 1 when we use DeltaT, 0 when not
 		// TDT = UT + ΔT
 		if use_deltaT {
-			sec_from_jd2000 += int64(cd_date_go.DeltaT(persTime.UtcTime.Year, bsp))
+			sec_from_jd2000 += int64(cd_date_go.DeltaT(persTime.UtcTime.Year))
 		}
 		persTime.SecFromJd2000 = int64(sec_from_jd2000)
 
@@ -53,12 +52,65 @@ func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_co
 		// 1 when we use DeltaT, 0 when not
 		// TDT = UT + ΔT
 		if use_deltaT {
-			sec_from_jd2000 += int64(cd_date_go.DeltaT(persTime.LocalTime.Year, bsp))
+			sec_from_jd2000 += int64(cd_date_go.DeltaT(persTime.LocalTime.Year))
 		}
 		persTime.SecFromJd2000 = sec_from_jd2000
 	}
 
+	return sec_from_jd2000, persTime
+
+}
+
+func CalcCosmo(data cd_consts_go.TimeData, bsp cd_consts_go.BspFile, info *cd_consts_go.CdInfo) {
+
+	// var persTime cd_consts_go.TimeData
+	// var sec_from_jd2000 int64
+
+	// use_deltaT := true
+
+	// Ephemeries time, вернем для правильного отображения пользователю DeltaT
+	// //This parameter is known as delta-T or ΔT (ΔT = TDT - UT).
+	// UT = TDT  - ΔT
+	// if data.TypeOfTyme == 0 {
+	// 	sec_from_jd2000 = data.SecFromJd2000
+	// 	persTime.SecFromJd2000 = sec_from_jd2000
+	// 	persTime.UtcTime = cd_date_go.SecJd2000ToGregMeeus(sec_from_jd2000 - int64(cd_date_go.DeltaT(cd_date_go.SecFromJd2000ToGreg(sec_from_jd2000).Year, bsp)))
+	// }
+
+	//UTC
+	// if data.TypeOfTyme == 1 {
+	// 	persTime.UtcTime = data.UtcTime
+	// 	sec_from_jd2000 = cd_date_go.GregToSecFromJD2000(persTime.UtcTime)
+	// 	// 1 when we use DeltaT, 0 when not
+	// 	// TDT = UT + ΔT
+	// 	if use_deltaT {
+	// 		sec_from_jd2000 += int64(cd_date_go.DeltaT(persTime.UtcTime.Year, bsp))
+	// 	}
+	// 	persTime.SecFromJd2000 = int64(sec_from_jd2000)
+
+	// 	// fmt.Println("inside  data.TypeOfTyme == 1")
+	// 	// fmt.Println("persTime.SecFromJd2000 == ", persTime.SecFromJd2000)
+	// }
+
+	//local
+	// Если есть смещение часового пояса вычитаем его
+	// if data.TypeOfTyme == 2 {
+	// 	persTime.LocalTime = data.LocalTime
+	// 	sec_from_jd2000 = cd_date_go.GregToSecFromJD2000(persTime.LocalTime)
+	// 	sec_from_jd2000 -= int64(data.Offset)
+	// 	persTime.UtcTime = cd_date_go.SecFromJd2000ToGreg(sec_from_jd2000)
+	// 	// console.log(this.formula.personality_time_UTC);
+	// 	// 1 when we use DeltaT, 0 when not
+	// 	// TDT = UT + ΔT
+	// 	if use_deltaT {
+	// 		sec_from_jd2000 += int64(cd_date_go.DeltaT(persTime.LocalTime.Year, bsp))
+	// 	}
+	// 	persTime.SecFromJd2000 = sec_from_jd2000
+	// }
+
 	//fmt.Println(sec_from_jd2000)
+
+	sec_from_jd2000, persTime := ConvertTime(data)
 
 	//calc personality
 	info.Personality.Planets = *calc_hd_vars(sec_from_jd2000, bsp)
