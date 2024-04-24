@@ -372,24 +372,12 @@ func CalcDesignTimeV2_old(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int6
 
 func CalcDesignTimeV3(sec_from_jd2000 int64, bsp cd_consts_go.BspFile) (int64, cd_consts_go.GregDate) {
 	// So for calcs we take:
-	//Max diff:  7_951_038
+	//Max diff:  7_950_940
 	//Min diff:  7_481_835
-	//Med diff:  7_716_436
+	//Med diff:  7_716_388
 
-	// 10_000 sec
-	// Max diff:  7950939
-	// Min diff:  7481835
-
-	// 1000 sec
-	// 	Max diff:  7950934
-	// Min diff:  7481835
-
-	//100 sec
-
-	//1 sec
-
-	const MED_DIFFERENCE = 7_716_436
-	const MAX_DIFFERENCE = 7_951_038
+	const MED_DIFFERENCE = 7_716_388
+	const MAX_DIFFERENCE = 7_950_940
 	const MIN_DIFFERENCE = 7_481_835
 
 	seconds_lowest_value := sec_from_jd2000 - MAX_DIFFERENCE
